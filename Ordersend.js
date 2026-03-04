@@ -1,39 +1,65 @@
-const orderForm = document.getElementById("orderForm");
-//We are using DOM manipulation to grab the form from Order.html
+import { auth, db } from "./firebase-config.js";
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-//We want to listen for the submit event on the form, and when it happens, we want to prevent the default behavior (which is to refresh the page) and instead run our own code to send the order data to Firestore.
-orderForm.addEventListener("submit", async(event) => {
+document.addEventListener("DOMContentLoaded", () => {
+  const orderForm = document.getElementById("orderForm");
+  const userStatus = document.getElementById("userStatus");
+  const logoutBtn = document.getElementById("logoutBtn");
 
- event.preventDefault();//prevent the default form submission behavior
+  // Listen for auth state changes
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      userStatus.textContent = "Logged in as: " + user.email;
+    } else {
+      userStatus.textContent = "Not logged in. Redirecting...";
+      setTimeout(() => {
+        window.location.href = "login.html";
+      }, 2000);
+    }
+  });
 
- const user = auth.currentUser;
- //Whoever is currently logged in, we want to associate the order with that user. If there is no user logged in, we want to alert the user that they must be logged in to place an order and then return from the function to prevent any further code from running.
+  // Handle order submission
+  orderForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
 
- if (!user) {
-   alert("You must be logged in.");
-   return;
- }
-//if user is not logged in, send an alert and stop the function from running
+    const user = auth.currentUser;
 
- const item = document.getElementById("item").value;
- const quantity = Number(document.getElementById("quantity").value);
- const total = Number(document.getElementById("total").value);
- //We are grabbing the values from the form and converting them to the apporopiate data types (quantity and total should be numbers, while item is a string)
+    if (!user) {
+      alert("Please log in to place an order");
+      window.location.href = "login.html";
+      return;
+    }
 
- //try-catch is done for error handling
- try {
-   await addDoc(collection(db, "orders"), {
-     userId: user.uid,
-     item: item,
-     quantity: quantity,
-     total: total,
-     createdAt: serverTimestamp()
-   });
+    const item = document.getElementById("item").value;
+    const quantity = Number(document.getElementById("quantity").value);
+    const totalPrice = Number(document.getElementById("totalPrice").value);
 
-   alert("Order placed successfully!");
-   orderForm.reset();
+    try {
+      await addDoc(collection(db, "orders"), {
+        userId: user.uid,
+        email: user.email,
+        item: item,
+        quantity: quantity,
+        totalPrice: totalPrice,
+        timestamp: serverTimestamp()
+      });
+      alert("Order placed successfully!");
+      orderForm.reset();
+    } catch (error) {
+      alert("Error placing order: " + error.message);
+      console.error("Order error:", error);
+    }
+  });
 
- } catch (error) {
-   console.error("Error adding order:", error);
- }
+  // Handle logout
+  logoutBtn.addEventListener("click", async () => {
+    try {
+      await signOut(auth);
+      alert("Logged out successfully!");
+      window.location.href = "login.html";
+    } catch (error) {
+      alert("Error logging out: " + error.message);
+    }
+  });
 });

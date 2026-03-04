@@ -1,34 +1,42 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+import { auth } from "./firebase-config.js";
+import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
-const loginForm = document.getElementById("login-form");
+// We are using DOM manipulation to grab the login form from Login.htmlJD
+document.addEventListener("DOMContentLoaded", () => {
 
-const firebaseConfig = {
-    apiKey: "AIzaSyCHgCz-zy_wBe67R0j3Y1dyPH_yVQTutHs",
-    authDomain: "learningfirebase-9944a.firebaseapp.com",
-    projectId: "learningfirebase-9944a",
-    storageBucket: "learningfirebase-9944a.firebasestorage.app",
-    messagingSenderId: "481174995932",
-    appId: "1:481174995932:web:1e9ae5cc95c51a2f9d8519"
-  };
-  
-loginForm.addEventListener("submit", function(e){
- e.preventDefault();
+  // Obtain the login form using the element ID "login-form" and store it 
+  // in the variable loginForm. JD
+  const loginForm = document.getElementById("login-form");
 
- const email = document.getElementById("email").value;
- const password = document.getElementById("password").value;
- const app = initializeApp(firebaseConfig);
- const auth = getAuth(app);
- 
+  // Adding an Event listener for loginForm that listens for "submit" events. JD
+  loginForm.addEventListener("submit", async (event) => {
 
- signInWithEmailAndPassword(auth, email, password)
-   .then((userCredential) => {
-       console.log("User Logged In:", userCredential.user);
-       alert("Login successful!");
-       window.location.href = "Order.html"; // Redirect to Order.html after successful login
-   })
-   .catch((error) => {
-       console.log("Login Error:", error.message);
-         alert("Login failed: " + error.message);
-   })
+    // Prevents page from refreshing on submit. JD
+    event.preventDefault();
+
+    // We are creating variables to store the values of the email and password fields
+    // from the form. JD
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    // We are using a try-catch block to handle any errors that 
+    // may occur during the login process. JD
+    try {
+      
+      // We use the signInWithEmailAndPassword function from the 
+      // Firebase Authentication SDK to sign in the user
+      // with the provided email and password. JD
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      alert("Login successful!");
+      window.location.href = "Order.html";
+
+    // If there is an error during the login process, 
+    // we catch it and send an alert containing the error message. JD
+    } catch (error) {
+
+      alert("Login failed: " + error.message);
+      console.error("Login Error:", error.message);
+
+    }
+  });
 });
