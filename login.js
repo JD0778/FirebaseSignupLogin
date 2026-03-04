@@ -25,6 +25,7 @@ loginForm.addEventListener("submit", function(e){
    .then((userCredential) => {
        console.log("User Logged In:", userCredential.user);
        alert("Login successful!");
+       window.location.href = "Order.html"; // Redirect to Order.html after successful login
    })
    .catch((error) => {
        console.log("Login Error:", error.message);

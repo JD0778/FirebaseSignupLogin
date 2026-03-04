@@ -1,9 +1,11 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
-const signupForm = document.getElementById("signup-form");
+
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -18,8 +20,11 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getFirestore(app);
 
 // Add an event listener to handle form submission
+const signupForm = document.getElementById("signup-form");
+
 signupForm.addEventListener("submit", (event) => {
     event.preventDefault(); // Prevent the default form submission behavior
 
